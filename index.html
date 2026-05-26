@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Bot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      color: #333;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      padding: 0 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 2rem;
+      font-size: 4rem;
+      letter-spacing: 2px;
+    }
+
+    .bot-container {
+      position: relative;
+      width: 60vh;
+      height: 60vh;
+      margin: 0 auto 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bot-container::before {
+      content: '';
+      position: absolute;
+      width: 55vh;
+      height: 55vh;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(52,152,219,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .bot-container::after {
+      content: '';
+      position: absolute;
+      bottom: 5vh;
+      width: 40vh;
+      height: 2vh;
+      background: radial-gradient(ellipse, rgba(0,0,0,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .bot-container.greeting::after {
+      animation: shadowPulse 1.5s ease-in-out;
+    }
+
+    .bot-container.farewell::after {
+      animation: shadowShrink 0.8s ease-in-out forwards;
+    }
+
+    @keyframes shadowPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.85); opacity: 0.6; }
+    }
+
+    @keyframes shadowShrink {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0.7); opacity: 0.3; }
+    }
+
+    /* ========= SVG ROBOT ========= */
+    .robot-svg {
+      width: 100%;
+      height: 100%;
+      animation: float 3s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+
+    .bot-container.greeting .robot-svg {
+      animation: float 3s ease-in-out infinite, greetBounce 0.5s ease-out 1;
+    }
+
+    .bot-container.farewell .robot-svg {
+      animation: float 3s ease-in-out infinite, farewellDip 0.6s ease-in-out 1;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes greetBounce {
+      0% { transform: translateY(0); }
+      40% { transform: translateY(-12px); }
+      70% { transform: translateY(-3px); }
+      100% { transform: translateY(0); }
+    }
+
+    @keyframes farewellDip {
+      0% { transform: translateY(0); }
+      30% { transform: translateY(5px); }
+      60% { transform: translateY(-2px); }
+      100% { transform: translateY(0); }
+    }
+
+    /* Antenna */
+    .antenna-orb {
+      animation: antennaGlow 2s ease-in-out infinite;
+    }
+
+    .bot-container.greeting .antenna-orb {
+      animation: antennaFast 0.3s ease-in-out 5;
+    }
+
+    .bot-container.farewell .antenna-orb {
+      animation: antennaDim 1.5s ease-in-out 2;
+    }
+
+    @keyframes antennaGlow {
+      0%, 100% { opacity: 0.7; r: 4; }
+      50% { opacity: 1; r: 5.5; }
+    }
+
+    @keyframes antennaFast {
+      0%, 100% { opacity: 1; r: 6; }
+      50% { opacity: 0.3; r: 3; }
+    }
+
+    @keyframes antennaDim {
+      0%, 100% { opacity: 0.5; r: 3.5; }
+      50% { opacity: 0.2; r: 2.5; }
+    }
+
+    /* Eyes */
+    .eye {
+      transition: all 0.4s ease;
+    }
+
+    .bot-container.greeting .eye {
+      fill: #d5f5e3;
+    }
+
+    .bot-container.farewell .eye {
+      fill: #fadbd8;
+    }
+
+    .pupil {
+      transition: all 0.4s ease;
+    }
+
+    .bot-container.greeting .pupil {
+      r: 7;
+    }
+
+    .bot-container.farewell .pupil {
+      fill: #95a5a6;
+      r: 4;
+    }
+
+    /* Idle blink: pupils squish */
+    .pupil-group {
+      animation: blink 4s ease-in-out infinite;
+    }
+
+    .bot-container.greeting .pupil-group,
+    .bot-container.farewell .pupil-group {
+      animation: none;
+    }
+
+    @keyframes blink {
+      0%, 46%, 54%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(0.15); }
+    }
+
+    /* Mouth */
+    .mouth-group rect,
+    .mouth-group path {
+      transition: opacity 0.3s ease;
+    }
+
+    .mouth-smile { transform-origin: 100px 62px; }
+    .bot-container.greeting .mouth-default { opacity: 0; }
+    .bot-container.greeting .mouth-smile { opacity: 1; }
+
+    .bot-container.farewell .mouth-default { opacity: 0; }
+    .bot-container.farewell .mouth-frown { opacity: 1; }
+
+    /* Arms */
+    .arm {
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .bot-container.greeting .arm-left {
+      transform: rotate(-40deg);
+    }
+
+    .bot-container.greeting .arm-right {
+      transform: rotate(40deg);
+    }
+
+    .bot-container.farewell .arm-left {
+      transform: rotate(-10deg) translateY(2px);
+    }
+
+    .bot-container.farewell .arm-right {
+      animation: waveFarewell 0.5s ease-in-out 4;
+    }
+
+    @keyframes waveFarewell {
+      0%, 100% { transform: rotate(25deg); }
+      50% { transform: rotate(-25deg); }
+    }
+
+    /* Chest screen lines */
+    .screen-line {
+      transition: opacity 0.5s ease;
+    }
+
+    .bot-container.greeting .screen-line {
+      animation: scanLine 0.8s ease 3;
+    }
+
+    .bot-container.farewell .screen-line {
+      animation: scanLine 1.2s ease 2;
+    }
+
+    @keyframes scanLine {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 0.2; }
+    }
+
+    /* Body buttons */
+    .btn-led {
+      transition: all 0.3s ease;
+    }
+
+    .bot-container.greeting .btn-led-1 { fill: #e74c3c; }
+    .bot-container.greeting .btn-led-2 { fill: #2ecc71; }
+    .bot-container.greeting .btn-led-3 { fill: #f1c40f; }
+
+    .bot-container.farewell .btn-led-1 { fill: #c0392b; opacity: 0.5; }
+    .bot-container.farewell .btn-led-2 { fill: #2980b9; opacity: 0.5; }
+    .bot-container.farewell .btn-led-3 { fill: #f39c12; opacity: 0.5; }
+
+    /* ========= SPEECH BUBBLE ========= */
+    .bot-message {
+      position: absolute;
+      top: -4vh;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: #2c3e50;
+      color: white;
+      padding: 1.5rem 3rem;
+      border-radius: 32px;
+      font-size: 2rem;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 10;
+      box-shadow: 0 12px 45px rgba(44,62,80,0.25);
+    }
+
+    .bot-message::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid #2c3e50;
+    }
+
+    .bot-message.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ========= BUTTONS ========= */
+    .button-section {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    button {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 1.5rem 3.5rem;
+      font-size: 2rem;
+      font-weight: 600;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+      box-shadow: 0 10px 30px rgba(52,152,219,0.3);
+      letter-spacing: 0.5px;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #3498db, #1f6fa5);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(52,152,219,0.4);
+    }
+
+    button:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 2px 8px rgba(52,152,219,0.3);
+    }
+
+    button:disabled {
+      background: #bdc3c7;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #farewell-btn {
+      background: linear-gradient(135deg, #e67e22, #d35400);
+      box-shadow: 0 4px 12px rgba(230,126,34,0.3);
+    }
+
+    #farewell-btn:hover {
+      background: linear-gradient(135deg, #e67e22, #c0392b);
+      box-shadow: 0 6px 20px rgba(230,126,34,0.4);
+    }
+
+    #farewell-btn:disabled {
+      background: #bdc3c7;
+      box-shadow: none;
+    }
+
+    /* ========= RESPONSIVE ========= */
+    @media (max-width: 768px) {
+      h1 { font-size: 2.5rem; }
+      .bot-container { width: 50vh; height: 50vh; }
+      button { padding: 1rem 2rem; font-size: 1.5rem; }
+      .bot-message { font-size: 1.5rem; padding: 1rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Campus Bot</h1>
+
+    <div id="bot-container" class="bot-container">
+      <svg class="robot-svg" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#c4cdd1" />
+            <stop offset="50%" stop-color="#a0abaf" />
+            <stop offset="100%" stop-color="#8b989d" />
+          </linearGradient>
+          <linearGradient id="darkMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#7f8c8d" />
+            <stop offset="100%" stop-color="#5d6d7e" />
+          </linearGradient>
+          <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2ecc71" />
+            <stop offset="100%" stop-color="#27ae60" />
+          </radialGradient>
+          <radialGradient id="antennaGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#f1c40f" />
+            <stop offset="100%" stop-color="#f39c12" />
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Antenna -->
+        <line x1="100" y1="14" x2="100" y2="0" stroke="#7f8c8d" stroke-width="3" stroke-linecap="round" />
+        <circle class="antenna-orb" cx="100" cy="0" r="4.5" fill="url(#antennaGlow)" filter="url(#glow)" />
+
+        <!-- Ears -->
+        <rect x="48" y="30" width="8" height="28" rx="3" fill="url(#darkMetal)" />
+        <rect x="144" y="30" width="8" height="28" rx="3" fill="url(#darkMetal)" />
+        <circle cx="52" cy="38" r="1.5" fill="#95a5a6" />
+        <circle cx="52" cy="50" r="1.5" fill="#95a5a6" />
+        <circle cx="148" cy="38" r="1.5" fill="#95a5a6" />
+        <circle cx="148" cy="50" r="1.5" fill="#95a5a6" />
+
+        <!-- Head -->
+        <rect x="52" y="12" width="96" height="66" rx="14" fill="url(#metalGrad)" stroke="#7f8c8d" stroke-width="1.5" />
+
+        <!-- Eyes -->
+        <g class="eyes">
+          <circle class="eye eye-left" cx="80" cy="42" r="9" fill="white" stroke="#5d6d7e" stroke-width="1.5" />
+          <circle class="eye eye-right" cx="120" cy="42" r="9" fill="white" stroke="#5d6d7e" stroke-width="1.5" />
+          <g class="pupil-group pupil-left-group" style="transform-origin: 80px 42px;">
+            <circle class="pupil pupil-left" cx="80" cy="42" r="5.5" fill="url(#eyeGlow)" filter="url(#glow)" />
+          </g>
+          <g class="pupil-group pupil-right-group" style="transform-origin: 120px 42px;">
+            <circle class="pupil pupil-right" cx="120" cy="42" r="5.5" fill="url(#eyeGlow)" filter="url(#glow)" />
+          </g>
+        </g>
+
+        <!-- Mouth -->
+        <g class="mouth-group">
+          <rect class="mouth-default" x="80" y="60" width="40" height="6" rx="3" fill="#5d6d7e" />
+          <path class="mouth-smile" d="M 82 62 Q 100 73 118 62" fill="none" stroke="#5d6d7e" stroke-width="3" stroke-linecap="round" opacity="0" />
+          <path class="mouth-frown" d="M 82 64 Q 100 53 118 64" fill="none" stroke="#5d6d7e" stroke-width="3" stroke-linecap="round" opacity="0" />
+        </g>
+
+        <!-- Neck -->
+        <rect x="88" y="78" width="24" height="16" rx="2" fill="url(#darkMetal)" />
+        <line x1="88" y1="83" x2="112" y2="83" stroke="#5d6d7e" stroke-width="1" />
+        <line x1="88" y1="88" x2="112" y2="88" stroke="#5d6d7e" stroke-width="1" />
+
+        <!-- Body -->
+        <rect x="52" y="94" width="96" height="76" rx="10" fill="url(#metalGrad)" stroke="#7f8c8d" stroke-width="1.5" />
+
+        <!-- Chest panel -->
+        <rect x="70" y="106" width="60" height="34" rx="4" fill="#2c3e50" />
+        <line class="screen-line" x1="78" y1="114" x2="122" y2="114" stroke="#2ecc71" stroke-width="1.5" opacity="0.6" />
+        <line class="screen-line" x1="78" y1="120" x2="122" y2="120" stroke="#2ecc71" stroke-width="1.5" opacity="0.6" />
+        <line class="screen-line" x1="78" y1="126" x2="108" y2="126" stroke="#2ecc71" stroke-width="1.5" opacity="0.6" />
+
+        <!-- Body buttons -->
+        <circle class="btn-led btn-led-1" cx="80" cy="154" r="4" fill="#c0392b" />
+        <circle class="btn-led btn-led-2" cx="100" cy="154" r="4" fill="#2980b9" />
+        <circle class="btn-led btn-led-3" cx="120" cy="154" r="4" fill="#d4ac0d" />
+
+        <!-- Left Arm -->
+        <g class="arm arm-left" style="transform-origin: 54px 113px;">
+          <line x1="54" y1="113" x2="30" y2="135" stroke="url(#darkMetal)" stroke-width="8" stroke-linecap="round" />
+          <line x1="30" y1="135" x2="30" y2="158" stroke="url(#darkMetal)" stroke-width="7" stroke-linecap="round" />
+          <circle cx="30" cy="160" r="4.5" fill="#a0abaf" stroke="#5d6d7e" stroke-width="1.5" />
+        </g>
+
+        <!-- Right Arm -->
+        <g class="arm arm-right" style="transform-origin: 146px 113px;">
+          <line x1="146" y1="113" x2="170" y2="135" stroke="url(#darkMetal)" stroke-width="8" stroke-linecap="round" />
+          <line x1="170" y1="135" x2="170" y2="158" stroke="url(#darkMetal)" stroke-width="7" stroke-linecap="round" />
+          <circle cx="170" cy="160" r="4.5" fill="#a0abaf" stroke="#5d6d7e" stroke-width="1.5" />
+        </g>
+
+        <!-- Legs -->
+        <rect x="70" y="170" width="22" height="26" rx="4" fill="url(#darkMetal)" />
+        <rect x="108" y="170" width="22" height="26" rx="4" fill="url(#darkMetal)" />
+        <!-- Feet -->
+        <rect x="66" y="194" width="28" height="7" rx="3" fill="#5d6d7e" />
+        <rect x="106" y="194" width="28" height="7" rx="3" fill="#5d6d7e" />
+      </svg>
+
+      <div id="bot-message" class="bot-message"></div>
+    </div>
+
+    <div class="button-section">
+      <button id="greet-btn">Sag Hallo</button>
+      <button id="farewell-btn">Sag Tschüs</button>
+      <button id ="information-btn">Campus Informationen</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const greetBtn = document.getElementById('greet-btn');
+      const farewellBtn = document.getElementById('farewell-btn');
+      const informationBtn = document.getElementById('information-btn');
+      const botContainer = document.getElementById('bot-container');
+      const botMessage = document.getElementById('bot-message');
+      let timeoutId = null;
+
+      function setButtonsDisabled(disabled) {
+        greetBtn.disabled = disabled;
+        farewellBtn.disabled = disabled;
+        informationBtn.disabled = disabled;
+      }
+
+      function resetBot() {
+        botMessage.classList.remove('show');
+        botContainer.className = 'bot-container';
+        timeoutId = null;
+      }
+
+      function showMessage(text, className, duration) {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          resetBot();
+        }
+
+        botMessage.textContent = text;
+        botContainer.className = 'bot-container ' + className;
+
+        requestAnimationFrame(() => {
+          botMessage.classList.add('show');
+        });
+
+        timeoutId = setTimeout(() => {
+          botMessage.classList.remove('show');
+          setTimeout(() => {
+            botContainer.className = 'bot-container';
+            timeoutId = null;
+            setButtonsDisabled(false);
+          }, 400);
+        }, duration);
+      }
+
+      function showMessageAsync(text, className = 'greeting', duration = 3000) {
+        return new Promise((resolve) => {
+          showMessage(text, className, duration);
+          setTimeout(resolve, duration + 450);
+        });
+      }
+
+      greetBtn.addEventListener('click', () => {
+        setButtonsDisabled(true);
+        fetch("http://localhost:7071/api/count/increment", {method: "PUT"})
+        showMessage('Hello there! Welcome to Campus!', 'greeting', 2800);
+      });
+
+      farewellBtn.addEventListener('click', () => {
+        setButtonsDisabled(true);
+        fetch("http://localhost:7071/api/count/decrement", {method: "PUT"})
+        showMessage('Goodbye! Thanks for visiting!', 'farewell', 3000);
+      });
+
+      informationBtn.addEventListener('click', async () => {
+        setButtonsDisabled(true);
+
+        await showMessageAsync('Im Campus gibt es 3 Stockwerke');
+        setButtonsDisabled(true)
+        await showMessageAsync('Der unterste Stock ist leer. Dort war früher das CCYP');
+        setButtonsDisabled(true)
+        await showMessageAsync('Im Erdgeschoss befindet sich die Basisausbildung. Insgesamt sind es etwa 40 Lernende');
+        setButtonsDisabled(true)
+        await showMessageAsync('Im 1. Stock befindet sich das Labor, Bistro und das Backoffice');
+        setButtonsDisabled(true)
+      });
+    });
+
+    function addUser() {
+
+    }
+  </script>
+</body>
+
+</html>
