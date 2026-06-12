@@ -492,14 +492,12 @@
         <g class="arm arm-left" style="transform-origin: 54px 113px;">
           <line x1="54" y1="113" x2="30" y2="135" stroke="url(#darkMetal)" stroke-width="8" stroke-linecap="round" />
           <line x1="30" y1="135" x2="30" y2="158" stroke="url(#darkMetal)" stroke-width="7" stroke-linecap="round" />
-          <circle cx="30" cy="160" r="4.5" fill="#a0abaf" stroke="#5d6d7e" stroke-width="1.5" />
         </g>
 
-        <!-- Right Arm -->
+         <!-- Right Arm -->
         <g class="arm arm-right" style="transform-origin: 146px 113px;">
           <line x1="146" y1="113" x2="170" y2="135" stroke="url(#darkMetal)" stroke-width="8" stroke-linecap="round" />
           <line x1="170" y1="135" x2="170" y2="158" stroke="url(#darkMetal)" stroke-width="7" stroke-linecap="round" />
-          <circle cx="170" cy="160" r="4.5" fill="#a0abaf" stroke="#5d6d7e" stroke-width="1.5" />
         </g>
 
         <!-- Legs -->
@@ -575,14 +573,14 @@
 
       greetBtn.addEventListener('click', () => {
         setButtonsDisabled(true);
-        fetch("http://localhost:7071/api/count/increment", {method: "PUT"})
-        showMessage('Hello there! Welcome to Campus!', 'greeting', 2800);
+        fetch("https://campusbotfunctions-atcbg3ehh9fcczdz.canadacentral-01.azurewebsites.net/api/count/increment", {method: "PUT"})
+        showMessage('Hallo und  Willkommen im Campus!', 'greeting', 2800);
       });
 
       farewellBtn.addEventListener('click', () => {
         setButtonsDisabled(true);
-        fetch("http://localhost:7071/api/count/decrement", {method: "PUT"})
-        showMessage('Goodbye! Thanks for visiting!', 'farewell', 3000);
+        fetch("https://campusbotfunctions-atcbg3ehh9fcczdz.canadacentral-01.azurewebsites.net/api/count/decrement", {method: "PUT"})
+        showMessage('Tschüss und bis zum nächsten Mal', 'farewell', 3000);
       });
 
       informationBtn.addEventListener('click', async () => {
